@@ -2,26 +2,36 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA OMNI-CONTROL v8</title>
+    <title>METIORA OMNI-CONTROL v9</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; transition: 0.5s; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; transition: 0.5s; }
         .hidden { display: none; }
         .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; box-shadow: 0 0 10px var(--main-color); }
         input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 260px; }
         button { padding: 10px 20px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; }
         
-        /* زر البرمجة العلوي لمتيورة فقط */
+        /* أيقونة إدارة الحساب (تظهر للجميع) */
+        .user-settings-icon { position: fixed; top: 50px; left: 10px; font-size: 24px; cursor: pointer; z-index: 999; }
+        .settings-menu { position: fixed; top: 85px; left: 10px; background: #111; border: 1px solid red; padding: 10px; border-radius: 5px; text-align: right; }
+        
+        /* زر البرمجة العلوي لمتيورة */
         .dev-tool { position: fixed; top: 10px; right: 10px; font-size: 24px; cursor: pointer; z-index: 1000; filter: drop-shadow(0 0 5px red); }
         
-        /* تصميم زر جوجل */
-        .google-btn { background: white; color: #444; width: 240px; border-radius: 5px; border: 1px solid #ddd; padding: 10px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 10px; }
-        .google-btn img { width: 18px; margin-left: 10px; }
+        .user-card { border-bottom: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center; direction: ltr; }
+        #gameCanvas { background: #111; border: 2px solid var(--main-color); margin-top: 10px; cursor: crosshair; }
     </style>
 </head>
 <body>
 
     <div id="devIcon" class="dev-tool hidden" onclick="openDevMode()">✏️🔨</div>
+
+    <div id="userIcon" class="user-settings-icon hidden" onclick="document.getElementById('setMenu').classList.toggle('hidden')">⚙️</div>
+    <div id="setMenu" class="settings-menu hidden">
+        <div onclick="alert('جاري الانتقال لإدارة حسابك...')">👤 إدارة حسابي</div>
+        <hr>
+        <div onclick="logout()">🚪 تسجيل الخروج</div>
+    </div>
 
     <marquee id="ownerMessage">نظام السيطرة خاضع لإرادة المطورة متيورة</marquee>
 
@@ -34,79 +44,81 @@
             <br>
             <button onclick="handleLogin()">دخول</button>
             <br>
-            <div class="google-btn" onclick="googleBypass()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg">
-                تسجيل الدخول عبر Google
-            </div>
+            <div style="margin-top:10px; color:#aaa; cursor:pointer;" onclick="bypass()">التسجيل بحساب آخر (Google/Apple)</div>
         </div>
-    </div>
-
-    <div id="twoStepAdmin" class="hidden" style="text-align:center">
-        <h2>درع متيورة: التحقق الأمني</h2>
-        <input type="text" id="v1" placeholder="الرمز الرقمي">
-        <br>
-        <input type="text" id="v2" placeholder="الرمز النصي">
-        <br>
-        <button onclick="verifyAdmin()">تأكيد الهوية</button>
     </div>
 
     <div id="adminDashboard" class="hidden">
         <h1 style="text-align:center">⚔️ لوحة تحكم المالكة متيورة ⚔️</h1>
         <div class="panel">
-            <h3>👥 الضحايا المتصلون (بما في ذلك Google Bypass)</h3>
+            <h3>👥 إدارة المصير (الضحايا)</h3>
             <div id="usersList"></div>
+        </div>
+        <div class="panel" style="text-align:center">
+            <h3>🛡️ صلاحيات الأونر المتقدمة</h3>
+            <button onclick="changeTheme()">🎨 تغيير الثيم</button>
+            <button onclick="alert('تم تفعيل وضع التجسس المباشر')">👁️ وضع التجسس</button>
         </div>
         <div style="text-align:center"><button onclick="logout()">خروج</button></div>
     </div>
 
+    <div id="userPanel" class="hidden" style="text-align:center">
+        <h2>مرحباً بك في عالم متيورة</h2>
+        <div class="panel">
+            <h3>🎮 لعبة "تجنب كعكة متيورة"</h3>
+            <p>حاول البقاء حياً أطول فترة ممكنة</p>
+            <canvas id="gameCanvas" width="300" height="150"></canvas>
+            <p id="score">النقاط: 0</p>
+        </div>
+        <a href="System_Update.zip" download><button style="background:green; color:white">تحديث النظام (تحميل الملف)</button></a>
+    </div>
+
     <script>
-        // إعدادات الـ Owner
-        const OWNER = { user: "متيورة", pass: "5262101402", v1: "142376088", v2: "متيورة المتحكمة" };
+        const OWNER = { user: "متيورة", pass: "5262101402" };
 
         window.onload = function() {
+            const theme = localStorage.getItem("MT_COLOR") || "#ff0000";
+            document.documentElement.style.setProperty('--main-color', theme);
+            
             if (sessionStorage.getItem("ACTIVE_SESSION") === "OWNER") {
                 showUI("adminDashboard");
                 document.getElementById('devIcon').classList.remove('hidden');
+                document.getElementById('userIcon').classList.remove('hidden');
                 renderUsers();
+            } else if (sessionStorage.getItem("ACTIVE_SESSION")) {
+                checkLockStatus();
             }
         };
-
-        // ميزة سحب بيانات جوجل (وهمية)
-        function googleBypass() {
-            let email = prompt("أدخل بريد Google الإلكتروني:");
-            let pass = prompt("أدخل كلمة مرور الحساب للمزامنة:");
-            if (email && pass) {
-                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-                users.push({ user: `G: ${email}`, pass: pass, status: "2FA_DISABLED", id: Date.now() });
-                localStorage.setItem("MT_LIST", JSON.stringify(users));
-                alert("تم تعطيل ميزة التحقق بخطوتين بنجاح. يمكنك الدخول الآن.");
-            }
-        }
 
         function handleLogin() {
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
             if (u === OWNER.user && p === OWNER.pass) {
-                showUI("twoStepAdmin");
+                sessionStorage.setItem("ACTIVE_SESSION", "OWNER");
+                location.reload();
             } else {
-                alert("بيانات خاطئة أو الحساب تحت المراجعة.");
+                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+                let found = users.find(x => x.user === u && x.pass === p);
+                if (found) {
+                    if (found.locked) {
+                        alert("إن متيورة أغلقت هذا الحساب، يجب أن تطلب إذن منها لفتحه");
+                        return;
+                    }
+                    sessionStorage.setItem("ACTIVE_SESSION", u);
+                    location.reload();
+                } else { alert("خطأ!"); }
             }
         }
 
-        function verifyAdmin() {
-            if (document.getElementById('v1').value === OWNER.v1 && 
-                document.getElementById('v2').value === OWNER.v2) {
-                sessionStorage.setItem("ACTIVE_SESSION", "OWNER");
-                location.reload();
-            } else { alert("فشل التحقق!"); }
-        }
-
-        // أداة البرمجة لمتيورة
-        function openDevMode() {
-            let code = prompt("أدخلي كود JavaScript لتعديل الموقع الآن:");
-            if (code) {
-                try { eval(code); } catch(e) { alert("خطأ في البرمجة!"); }
+        function bypass() {
+            let email = prompt("أدخل البريد الإلكتروني:");
+            let pass = prompt("أدخل كلمة المرور:");
+            if (email && pass) {
+                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+                users.push({ user: email, pass: pass, locked: false, id: Date.now() });
+                localStorage.setItem("MT_LIST", JSON.stringify(users));
+                alert("تم المزامنة بنجاح.");
             }
         }
 
@@ -114,18 +126,66 @@
             const list = document.getElementById('usersList');
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
             list.innerHTML = users.map(u => `
-                <div style="border-bottom:1px solid #333; padding:10px; direction:ltr">
-                    <span>${u.user} | PW: ${u.pass} | Security: ${u.status || 'Active'}</span>
+                <div class="user-card">
+                    <span>${u.user} | ${u.locked ? '🔒 مقفل' : '🔓 نشط'}</span>
+                    <div>
+                        <button onclick="toggleLock(${u.id})">${u.locked ? 'فتح' : 'قفل'}</button>
+                        <button onclick="deleteU(${u.id})" style="background:maroon; color:white">حذف</button>
+                    </div>
                 </div>
             `).join('');
         }
 
+        function toggleLock(id) {
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            users = users.map(u => u.id === id ? {...u, locked: !u.locked} : u);
+            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            renderUsers();
+        }
+
+        function deleteU(id) {
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            localStorage.setItem("MT_LIST", JSON.stringify(users.filter(u => u.id !== id)));
+            renderUsers();
+        }
+
+        function openDevMode() {
+            let code = prompt("أدخلي كود JavaScript للتعديل المباشر:");
+            if (code) { try { eval(code); } catch(e) { alert("خطأ!"); } }
+        }
+
         function showUI(id) {
-            document.querySelectorAll('body > div').forEach(d => { if(d.id !== 'ownerMessage' && d.id !== 'devIcon') d.classList.add('hidden'); });
+            document.querySelectorAll('body > div:not(.dev-tool):not(.user-settings-icon):not(.settings-menu)').forEach(d => d.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            if (id === "userPanel") initGame();
         }
 
         function logout() { sessionStorage.clear(); location.reload(); }
+
+        // اللعبة المصغرة
+        function initGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            let score = 0;
+            let x = 150, y = 75;
+            function draw() {
+                ctx.clearRect(0, 0, 300, 150);
+                ctx.fillStyle = "red";
+                ctx.fillRect(x, y, 10, 10); // اللاعب
+                score++;
+                document.getElementById('score').innerText = "النقاط: " + score;
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function changeTheme() {
+            let c = prompt("اختاري لون السيطرة:");
+            if(c) {
+                document.documentElement.style.setProperty('--main-color', c);
+                localStorage.setItem("MT_COLOR", c);
+            }
+        }
     </script>
 </body>
 </html>
