@@ -2,83 +2,138 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA ULTIMATE CONTROL</title>
+    <title>METIORA OMNI-CONTROL v4</title>
     <style>
-        body { background: #000; color: #ff0000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; }
+        :root { --main-color: #ff0000; --bg-color: #000; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', Courier, monospace; margin: 0; text-align: center; transition: 0.5s; }
         .hidden { display: none; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; max-width: 800px; margin: auto; }
-        .control-btn { padding: 20px; font-size: 18px; font-weight: bold; cursor: pointer; border: 2px solid red; background: #111; color: white; transition: 0.3s; }
-        .control-btn:hover { background: red; color: black; box-shadow: 0 0 15px red; }
-        .lock-msg { font-size: 24px; margin-top: 10%; color: #ff0000; text-shadow: 2px 2px #550000; }
-        input { padding: 15px; background: #000; color: #00ff00; border: 1px solid red; width: 300px; text-align: center; font-size: 18px; }
+        .panel { border: 2px solid var(--main-color); margin: 20px; padding: 20px; background: #050505; border-radius: 10px; }
+        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 80%; max-width: 300px; }
+        button { padding: 12px 25px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; border-radius: 5px; }
+        .user-list { text-align: left; direction: ltr; color: #fff; font-size: 14px; }
+        .monitor-frame { width: 90%; height: 200px; background: #222; border: 1px dashed red; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="authScreen">
-        <div class="lock-msg">
-            <h1>نظام سيطرة متيورة المتحكمة</h1>
-            <p>أدخلي كلمة المرور لفك تشفير لوحة التحكم</p>
-        </div>
-        <input type="password" id="masterPass" placeholder="كلمة المرور">
-        <br><br>
-        <button class="control-btn" onclick="unlockSystem()">دخول الآدمن</button>
+    <div id="step1">
+        <h1 style="margin-top: 10%;">نظام السيطرة - متيورة</h1>
+        <input type="text" id="userIn" placeholder="اسم الحساب">
+        <br>
+        <input type="password" id="passIn" placeholder="كلمة المرور">
+        <br>
+        <button onclick="goStep2()">متابعة</button>
+    </div>
+
+    <div id="step2" class="hidden">
+        <h2>التحقق بخطوتين (بروتوكول متيورة)</h2>
+        <input type="text" id="v1" placeholder="الرمز الأول">
+        <br>
+        <input type="text" id="v2" placeholder="الرمز الثاني">
+        <br>
+        <button onclick="finalAuth()">تفعيل السيطرة</button>
     </div>
 
     <div id="adminPanel" class="hidden">
-        <h1 style="color: white; border-bottom: 2px solid red; padding: 20px;">لوحة السيطرة على الهاتف - متيورة</h1>
+        <h1>مرحباً أيتها المطورة المتحكمة</h1>
         
-        <div class="dashboard">
-            <button class="control-btn" onclick="cmd('فتح الكاميرا')">📸 فتح الكاميرا سراً</button>
-            <button class="control-btn" onclick="cmd('مراقبة الشاشة')">🖥️ بث الشاشة مباشر</button>
-            <button class="control-btn" onclick="cmd('قفل الهاتف')">🔒 قفل الهاتف نهائياً</button>
-            <button class="control-btn" onclick="cmd('سحب الصور')">📂 سحب معرض الصور</button>
-            <button class="control-btn" onclick="cmd('تتبع الموقع')">📍 تحديد الموقع بدقة</button>
-            <button class="control-btn" onclick="cmd('فتح الميكروفون')">🎙️ التنصت المباشر</button>
+        <div class="panel">
+            <h3>🖥️ مراقبة الشاشة والكاميرا (مباشر)</h3>
+            <div class="monitor-frame" id="camStream">بانتظار إذن الضحية...</div>
+            <button onclick="startCapture()">بدء السحب المباشر</button>
         </div>
 
-        <div id="statusUpdate" style="color: #00ff00; margin-top: 20px; font-family: monospace;">> النظام بانتظار الأوامر...</div>
+        <div class="panel">
+            <h3>👥 قائمة المستخدمين المسجلين</h3>
+            <div id="usersList" class="user-list">لا يوجد حسابات حالياً.</div>
+        </div>
+
+        <div class="panel">
+            <h3>🎨 إعدادات المظهر (تعديل مباشر)</h3>
+            <input type="color" id="colorPicker" onchange="changeTheme(this.value)">
+            <p>اختاري لون السيطرة المفضل لديكِ</p>
+        </div>
+
+        <button onclick="logout()" style="background: #333; color: white;">خروج آمن</button>
+    </div>
+
+    <div id="userInterface" class="hidden">
+        <h2>إنشاء حساب جديد في نظام متيورة</h2>
+        <input type="text" id="newU" placeholder="اختر اسم مستخدم">
+        <br>
+        <button onclick="registerUser()">إنشاء حساب</button>
     </div>
 
     <script>
-        const KEY = "متيورة المتحكمة و المسيطرة";
+        // بيانات الاعتماد الخاصة بكِ
+        const ADMIN_USER = "متيورة";
+        const ADMIN_PASS = "5262101402";
+        const VERIFY_1 = "142376088";
+        const VERIFY_2 = "متيورة المتحكمة";
 
-        function unlockSystem() {
-            const val = document.getElementById('masterPass').value;
-            if (val === KEY) {
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-                localStorage.setItem("METIORA_LOGIN", "TRUE");
+        function goStep2() {
+            const u = document.getElementById('userIn').value;
+            const p = document.getElementById('passIn').value;
+            if (u === ADMIN_USER && p === ADMIN_PASS) {
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
             } else {
-                alert("تم رفض الوصول! كعكة متيورة السوداء تراقبك.");
+                // إذا لم تكن المطورة، يظهر له خيار إنشاء حساب
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('userInterface').classList.remove('hidden');
             }
         }
 
-        function cmd(action) {
-            const status = document.getElementById('statusUpdate');
-            status.innerText = `> جاري تنفيذ أمر [${action}]...`;
-            
-            // ملاحظة تقنية للمطورة:
-            // هذه الأزرار تحتاج لربطها بملف APK (للأندرويد) مثل Eagle Spy 
-            // لتعمل حقيقياً على النظام خارج حدود المتصفح.
-            
-            setTimeout(() => {
-                status.innerText = `> تم إرسال أمر ${action} إلى جهاز الضحية بنجاح.`;
-            }, 2000);
+        function finalAuth() {
+            const v1 = document.getElementById('v1').value;
+            const v2 = document.getElementById('v2').value;
+            if (v1 === VERIFY_1 && v2 === VERIFY_2) {
+                localStorage.setItem("METIORA_LOGIN", "ADMIN");
+                showAdmin();
+            } else { alert("رمز التحقق خاطئ!"); }
         }
 
-        // حفظ الدخول
-        if (localStorage.getItem("METIORA_LOGIN") === "TRUE") {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
+        function showAdmin() {
+            document.querySelectorAll('div').forEach(d => d.classList.add('hidden'));
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadUsers();
         }
+
+        // ميزة إنشاء حساب للمستخدمين
+        function registerUser() {
+            const name = document.getElementById('newU').value;
+            let users = JSON.parse(localStorage.getItem("MT_USERS") || "[]");
+            users.push({ name: name, time: new Date().toLocaleString(), info: navigator.userAgent });
+            localStorage.setItem("MT_USERS", JSON.stringify(users));
+            alert("تم إنشاء حسابك بنجاح. بانتظار موافقة المطورة.");
+        }
+
+        function loadUsers() {
+            const list = document.getElementById('usersList');
+            let users = JSON.parse(localStorage.getItem("MT_USERS") || "[]");
+            list.innerHTML = users.map(u => `<div>> ${u.name} (${u.time})</div>`).join('');
+        }
+
+        // تعديل اللون مباشرة من الموقع
+        function changeTheme(color) {
+            document.documentElement.style.setProperty('--main-color', color);
+            localStorage.setItem("MT_COLOR", color);
+        }
+
+        async function startCapture() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoArea = document.getElementById('camStream');
+                videoArea.innerHTML = '<video id="v" autoplay style="width:100%"></video>';
+                document.getElementById('v').srcObject = stream;
+            } catch (e) { alert("يجب منح الصلاحيات للضحية أولاً."); }
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+
+        // استرجاع الإعدادات المحفوظة
+        if (localStorage.getItem("METIORA_LOGIN") === "ADMIN") { showAdmin(); }
+        if (localStorage.getItem("MT_COLOR")) { changeTheme(localStorage.getItem("MT_COLOR")); }
     </script>
 </body>
 </html>
-<div id="victimView">
-    <h2 style="color: white;">تنبيه أمني من نظام متيورة</h2>
-    <p>يجب تحميل "بروتوكول الوصول" لتشغيل الهاتف مجدداً</p>
-    <a href="رابط_ملف_السيطرة_الخاص_بمتيورة.apk" download>
-        <button class="control-btn" style="background: green;">تحميل وتثبيت الآن</button>
-    </a>
-</div>
