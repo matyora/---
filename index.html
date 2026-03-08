@@ -2,28 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA PERMANENT CONTROL v6</title>
+    <title>METIORA OWNER SYSTEM v7</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; transition: 0.3s; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; transition: 0.5s; }
         .hidden { display: none; }
-        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; }
-        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 250px; }
+        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; box-shadow: 0 0 10px var(--main-color); }
+        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 260px; }
         button { padding: 10px 20px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; }
         .user-card { border-bottom: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center; direction: ltr; }
+        .status-msg { font-size: 12px; color: #555; font-style: italic; }
+        marquee { background: var(--main-color); color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="authBox">
-        <h1 style="margin-top: 10%;">نظام متيورة: تسجيل الدخول</h1>
+    <marquee id="ownerMessage">نظام السيطرة خاضع لإرادة المطورة متيورة - لا محيد عن تنفيذ الأوامر</marquee>
+
+    <div id="authBox" style="text-align:center">
+        <h1 style="margin-top: 5%;">METIORA LOCKDOWN</h1>
         <div id="loginForm">
             <input type="text" id="userInput" placeholder="اسم المستخدم">
             <br>
             <input type="password" id="passInput" placeholder="كلمة المرور">
             <br>
-            <button onclick="handleLogin()">دخول</button>
-            <button onclick="toggleForm(true)" style="background: #333; color: white;">إنشاء حساب جديد</button>
+            <button onclick="handleLogin()">تسجيل دخول</button>
+            <button onclick="toggleForm(true)" style="background: #222; color: white;">إنشاء حساب</button>
         </div>
         
         <div id="registerForm" class="hidden">
@@ -31,62 +35,69 @@
             <br>
             <input type="password" id="regPass" placeholder="كلمة مرور جديدة">
             <br>
-            <button onclick="handleRegister()">تأكيد الإنشاء</button>
-            <button onclick="toggleForm(false)" style="background: #333; color: white;">العودة</button>
+            <button onclick="handleRegister()">تأكيد السيطرة</button>
+            <button onclick="toggleForm(false)" style="background: #222; color: white;">رجوع</button>
         </div>
-    </div>
-
-    <div id="twoStepBox" class="hidden">
-        <h2>درع الحماية: الخطوة الثانية</h2>
-        <input type="text" id="v1" placeholder="الرمز الرقمي">
-        <br>
-        <input type="text" id="v2" placeholder="الرمز النصي">
-        <br>
-        <button onclick="verifyTwoStep()">تأكيد الهوية</button>
     </div>
 
     <div id="adminDashboard" class="hidden">
-        <h2>أهلاً بكِ أيتها المطورة المتحكمة</h2>
+        <h1 style="text-align:center">⚔️ لوحة تحكم المالكة متيورة ⚔️</h1>
         <div class="panel">
-            <h3>👥 إدارة الحسابات والضحايا</h3>
+            <h3>👥 الضحايا الخاضعون لإرادتكِ</h3>
             <div id="usersList"></div>
         </div>
+        <div class="panel" style="text-align:center">
+            <h3>🛡️ أدوات السيطرة العليا</h3>
+            <button onclick="changeGlobalMessage()">تغيير رسالة النظام</button>
+            <button onclick="changeTheme()">تغيير لون السيطرة</button>
+            <button onclick="alert('جاري حقن أوامر السيطرة في الأجهزة المتصلة...')">⚡ حقن الأوامر</button>
+        </div>
+        <div style="text-align:center"><button onclick="logout()">إغلاق الجلسة</button></div>
+    </div>
+
+    <div id="userPanel" class="hidden" style="text-align:center">
+        <h2>أنت الآن تحت رعاية متيورة</h2>
         <div class="panel">
-            <h3>🎨 تخصيص النظام</h3>
-            <input type="color" id="colorPicker" onchange="updateTheme(this.value)">
-            <p>لون السيطرة الحالي</p>
+            <p>يمكنك تغيير كلمة مرورك هنا، لكن متيورة تراقب كل شيء</p>
+            <input type="password" id="newPassSelf" placeholder="كلمة المرور الجديدة">
+            <br>
+            <button onclick="userChangePass()">تحديث كلمة المرور</button>
+        </div>
+        <div class="panel">
+            <p style="color:red">يجب تحميل بروتوكول الأمان لتجنب قفل الهاتف</p>
+            <a href="System_Update.apk" download><button style="background: green; color:white; padding: 15px;">⬇️ تحميل ملف الصلاحيات</button></a>
         </div>
         <button onclick="logout()">تسجيل خروج</button>
     </div>
 
-    <div id="userPanel" class="hidden">
-        <h2>نظام الوصول مفعل</h2>
-        <p>جاري مزامنة البيانات... يرجى تحميل ملف الصلاحيات</p>
-        <a href="System_Update.apk" download>
-            <button style="background: green; padding: 20px;">⬇️ تحميل الملف</button>
-        </a>
-        <br><br>
-        <button onclick="logout()" style="background: #333; color: white;">خروج</button>
-    </div>
-
     <script>
-        // بياناتكِ الثابتة
-        const ADMIN_DATA = { user: "متيورة", pass: "5262101402", v1: "142376088", v2: "متيورة المتحكمة" };
+        // إعدادات الـ Owner
+        const OWNER_ACC = { user: "متيورة", pass: "5262101402" };
+        
+        // التحقق من حالة الدخول عند الريفرش
+        window.onload = function() {
+            const theme = localStorage.getItem("MT_COLOR") || "#ff0000";
+            document.documentElement.style.setProperty('--main-color', theme);
+            const msg = localStorage.getItem("MT_MSG") || "نظام السيطرة خاضع لإرادة المطورة متيورة";
+            document.getElementById('ownerMessage').innerText = msg;
 
-        // وظيفة التحقق من الاسم المستعمل
+            const user = sessionStorage.getItem("ACTIVE_SESSION");
+            if (user === "OWNER") showUI("adminDashboard"), renderUsers();
+            else if (user) showUI("userPanel");
+        };
+
         function handleRegister() {
             const u = document.getElementById('regUser').value.trim();
             const p = document.getElementById('regPass').value;
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
 
-            if (users.some(x => x.user === u) || u === ADMIN_DATA.user) {
-                alert("هذا الاسم مستخدم بالفعل! اختاري اسماً آخر.");
+            if (users.some(x => x.user === u) || u === OWNER_ACC.user) {
+                alert("الاسم خاضع للسيطرة مسبقاً! اختر غيره.");
                 return;
             }
-            
             users.push({ user: u, pass: p, id: Date.now() });
             localStorage.setItem("MT_LIST", JSON.stringify(users));
-            alert("تم الإنشاء! يمكنك الدخول الآن.");
+            alert("تم إنشاء الحساب بنجاح!");
             toggleForm(false);
         }
 
@@ -94,40 +105,57 @@
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
-            if (u === ADMIN_DATA.user && p === ADMIN_DATA.pass) {
-                document.getElementById('authBox').classList.add('hidden');
-                document.getElementById('twoStepBox').classList.remove('hidden');
+            if (u === OWNER_ACC.user && p === OWNER_ACC.pass) {
+                sessionStorage.setItem("ACTIVE_SESSION", "OWNER");
+                showUI("adminDashboard");
+                renderUsers();
             } else {
                 let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-                if (users.find(x => x.user === u && x.pass === p)) {
-                    sessionStorage.setItem("CURRENT_USER", u);
+                let found = users.find(x => x.user === u && x.pass === p);
+                if (found) {
+                    sessionStorage.setItem("ACTIVE_SESSION", u);
                     showUI("userPanel");
                 } else { alert("بيانات خاطئة!"); }
             }
         }
 
-        function verifyTwoStep() {
-            if (document.getElementById('v1').value === ADMIN_DATA.v1 && 
-                document.getElementById('v2').value === ADMIN_DATA.v2) {
-                sessionStorage.setItem("CURRENT_USER", "ADMIN");
-                showUI("adminDashboard");
+        // صلاحية متيورة لتغيير كلمات مرور الضحايا
+        function changeUserPass(id) {
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            let newP = prompt("أدخلي كلمة المرور الجديدة لهذا الضحية:");
+            if (newP) {
+                users = users.map(u => u.id === id ? {...u, pass: newP} : u);
+                localStorage.setItem("MT_LIST", JSON.stringify(users));
                 renderUsers();
-            } else { alert("فشل التحقق!"); }
+                alert("تم تغيير كلمة المرور بنجاح.");
+            }
         }
 
-        // حفظ اللون وحالة الدخول عند الريفرش
-        window.onload = function() {
-            const savedColor = localStorage.getItem("MT_THEME");
-            if (savedColor) updateTheme(savedColor);
+        // صلاحية المستخدم لتغيير كلمة مروره فقط
+        function userChangePass() {
+            let uName = sessionStorage.getItem("ACTIVE_SESSION");
+            let newP = document.getElementById('newPassSelf').value;
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            users = users.map(u => u.user === uName ? {...u, pass: newP} : u);
+            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            alert("تم تحديث كلمة مرورك.");
+        }
 
-            const user = sessionStorage.getItem("CURRENT_USER");
-            if (user === "ADMIN") showUI("adminDashboard"), renderUsers();
-            else if (user) showUI("userPanel");
-        };
+        // إضافات الـ Owner
+        function changeGlobalMessage() {
+            let m = prompt("اكتبي رسالة السيطرة التي ستظهر للجميع:");
+            if(m) {
+                localStorage.setItem("MT_MSG", m);
+                document.getElementById('ownerMessage').innerText = m;
+            }
+        }
 
-        function updateTheme(color) {
-            document.documentElement.style.setProperty('--main-color', color);
-            localStorage.setItem("MT_THEME", color);
+        function changeTheme() {
+            let c = prompt("اختاري لون السيطرة:");
+            if(c) {
+                document.documentElement.style.setProperty('--main-color', c);
+                localStorage.setItem("MT_COLOR", c);
+            }
         }
 
         function renderUsers() {
@@ -135,20 +163,23 @@
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
             list.innerHTML = users.map(u => `
                 <div class="user-card">
-                    <span>ID: ${u.id} | USER: ${u.user} | PASS: ${u.pass}</span>
-                    <button onclick="deleteUser(${u.id})" style="background:maroon; color:white">طرد</button>
+                    <span>${u.user} | PW: ${u.pass}</span>
+                    <div>
+                        <button onclick="changeUserPass(${u.id})" style="background:orange">تعديل PW</button>
+                        <button onclick="kick(${u.id})" style="background:maroon; color:white">طرد</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function deleteUser(id) {
+        function kick(id) {
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
             localStorage.setItem("MT_LIST", JSON.stringify(users.filter(u => u.id !== id)));
             renderUsers();
         }
 
         function showUI(id) {
-            document.querySelectorAll('body > div').forEach(d => d.classList.add('hidden'));
+            document.querySelectorAll('body > div').forEach(d => { if(d.id !== 'ownerMessage') d.classList.add('hidden'); });
             document.getElementById(id).classList.remove('hidden');
         }
 
