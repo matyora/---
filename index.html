@@ -2,110 +2,132 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA OMNI-SYSTEM v5</title>
+    <title>METIORA PERMANENT CONTROL v6</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; transition: 0.3s; }
         .hidden { display: none; }
         .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; }
         input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 250px; }
         button { padding: 10px 20px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; }
-        .user-card { border-bottom: 1px solid #333; padding: 10px; text-align: right; display: flex; justify-content: space-between; align-items: center; }
-        .edit-btn { background: #555; color: white; font-size: 12px; }
+        .user-card { border-bottom: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center; direction: ltr; }
     </style>
 </head>
 <body>
 
     <div id="authBox">
-        <h1 style="margin-top: 10%;">كعكة متيورة السوداء</h1>
+        <h1 style="margin-top: 10%;">نظام متيورة: تسجيل الدخول</h1>
         <div id="loginForm">
             <input type="text" id="userInput" placeholder="اسم المستخدم">
             <br>
             <input type="password" id="passInput" placeholder="كلمة المرور">
             <br>
-            <button onclick="handleLogin()">تسجيل الدخول</button>
+            <button onclick="handleLogin()">دخول</button>
             <button onclick="toggleForm(true)" style="background: #333; color: white;">إنشاء حساب جديد</button>
         </div>
         
         <div id="registerForm" class="hidden">
-            <input type="text" id="regUser" placeholder="اختر اسم مستخدم">
+            <input type="text" id="regUser" placeholder="اسم مستخدم جديد">
             <br>
-            <input type="password" id="regPass" placeholder="اختر كلمة مرور">
+            <input type="password" id="regPass" placeholder="كلمة مرور جديدة">
             <br>
             <button onclick="handleRegister()">تأكيد الإنشاء</button>
             <button onclick="toggleForm(false)" style="background: #333; color: white;">العودة</button>
         </div>
     </div>
 
+    <div id="twoStepBox" class="hidden">
+        <h2>درع الحماية: الخطوة الثانية</h2>
+        <input type="text" id="v1" placeholder="الرمز الرقمي">
+        <br>
+        <input type="text" id="v2" placeholder="الرمز النصي">
+        <br>
+        <button onclick="verifyTwoStep()">تأكيد الهوية</button>
+    </div>
+
     <div id="adminDashboard" class="hidden">
         <h2>أهلاً بكِ أيتها المطورة المتحكمة</h2>
         <div class="panel">
             <h3>👥 إدارة الحسابات والضحايا</h3>
-            <div id="usersList">لا يوجد حسابات نشطة.</div>
+            <div id="usersList"></div>
         </div>
         <div class="panel">
-            <h3>🛠️ أدوات السيطرة السريعة</h3>
-            <button onclick="alert('جاري سحب الشاشة...')">🖥️ مراقبة الشاشة</button>
-            <button onclick="alert('جاري فتح الكاميرا...')">📸 الكاميرا</button>
-            <button onclick="changeTheme()">🎨 تغيير الثيم</button>
+            <h3>🎨 تخصيص النظام</h3>
+            <input type="color" id="colorPicker" onchange="updateTheme(this.value)">
+            <p>لون السيطرة الحالي</p>
         </div>
-        <button onclick="location.reload()">تسجيل خروج</button>
+        <button onclick="logout()">تسجيل خروج</button>
     </div>
 
     <div id="userPanel" class="hidden">
-        <h2>مرحباً بك في نظام الوصول</h2>
-        <p>يجب تحميل الملف التالي لتفعيل حسابك:</p>
+        <h2>نظام الوصول مفعل</h2>
+        <p>جاري مزامنة البيانات... يرجى تحميل ملف الصلاحيات</p>
         <a href="System_Update.apk" download>
-            <button style="background: green; padding: 20px;">⬇️ تحميل ملف الصلاحيات</button>
+            <button style="background: green; padding: 20px;">⬇️ تحميل الملف</button>
         </a>
+        <br><br>
+        <button onclick="logout()" style="background: #333; color: white;">خروج</button>
     </div>
 
     <script>
-        // بياناتكِ الخاصة
-        const ADMIN_ACC = { user: "متيورة", pass: "5262101402" };
+        // بياناتكِ الثابتة
+        const ADMIN_DATA = { user: "متيورة", pass: "5262101402", v1: "142376088", v2: "متيورة المتحكمة" };
 
-        function toggleForm(showReg) {
-            document.getElementById('loginForm').classList.toggle('hidden', showReg);
-            document.getElementById('registerForm').classList.toggle('hidden', !showReg);
+        // وظيفة التحقق من الاسم المستعمل
+        function handleRegister() {
+            const u = document.getElementById('regUser').value.trim();
+            const p = document.getElementById('regPass').value;
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+
+            if (users.some(x => x.user === u) || u === ADMIN_DATA.user) {
+                alert("هذا الاسم مستخدم بالفعل! اختاري اسماً آخر.");
+                return;
+            }
+            
+            users.push({ user: u, pass: p, id: Date.now() });
+            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            alert("تم الإنشاء! يمكنك الدخول الآن.");
+            toggleForm(false);
         }
 
         function handleLogin() {
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
-            if (u === ADMIN_ACC.user && p === ADMIN_ACC.pass) {
-                showAdmin();
+            if (u === ADMIN_DATA.user && p === ADMIN_DATA.pass) {
+                document.getElementById('authBox').classList.add('hidden');
+                document.getElementById('twoStepBox').classList.remove('hidden');
             } else {
-                // فحص إذا كان المستخدم مسجلاً في القائمة
                 let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-                let found = users.find(x => x.user === u && x.pass === p);
-                if (found) showUserArea();
-                else alert("خطأ في البيانات!");
+                if (users.find(x => x.user === u && x.pass === p)) {
+                    sessionStorage.setItem("CURRENT_USER", u);
+                    showUI("userPanel");
+                } else { alert("بيانات خاطئة!"); }
             }
         }
 
-        function handleRegister() {
-            const u = document.getElementById('regUser').value;
-            const p = document.getElementById('regPass').value;
-            if(!u || !p) return;
-
-            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            users.push({ user: u, pass: p, id: Date.now() });
-            localStorage.setItem("MT_LIST", JSON.stringify(users));
-            
-            alert("تم إنشاء الحساب بنجاح!");
-            showUserArea();
+        function verifyTwoStep() {
+            if (document.getElementById('v1').value === ADMIN_DATA.v1 && 
+                document.getElementById('v2').value === ADMIN_DATA.v2) {
+                sessionStorage.setItem("CURRENT_USER", "ADMIN");
+                showUI("adminDashboard");
+                renderUsers();
+            } else { alert("فشل التحقق!"); }
         }
 
-        function showAdmin() {
-            document.getElementById('authBox').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            renderUsers();
-        }
+        // حفظ اللون وحالة الدخول عند الريفرش
+        window.onload = function() {
+            const savedColor = localStorage.getItem("MT_THEME");
+            if (savedColor) updateTheme(savedColor);
 
-        function showUserArea() {
-            document.getElementById('authBox').classList.add('hidden');
-            document.getElementById('userPanel').classList.remove('hidden');
+            const user = sessionStorage.getItem("CURRENT_USER");
+            if (user === "ADMIN") showUI("adminDashboard"), renderUsers();
+            else if (user) showUI("userPanel");
+        };
+
+        function updateTheme(color) {
+            document.documentElement.style.setProperty('--main-color', color);
+            localStorage.setItem("MT_THEME", color);
         }
 
         function renderUsers() {
@@ -113,36 +135,29 @@
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
             list.innerHTML = users.map(u => `
                 <div class="user-card">
-                    <span>👤 ${u.user} (PW: ${u.pass})</span>
-                    <div>
-                        <button class="edit-btn" onclick="editUser(${u.id})">تعديل</button>
-                        <button class="edit-btn" style="background:maroon" onclick="kickUser(${u.id})">طرد</button>
-                    </div>
+                    <span>ID: ${u.id} | USER: ${u.user} | PASS: ${u.pass}</span>
+                    <button onclick="deleteUser(${u.id})" style="background:maroon; color:white">طرد</button>
                 </div>
             `).join('');
         }
 
-        function editUser(id) {
+        function deleteUser(id) {
             let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            let newPass = prompt("أدخلي كلمة المرور الجديدة:");
-            if(newPass) {
-                users = users.map(u => u.id === id ? {...u, pass: newPass} : u);
-                localStorage.setItem("MT_LIST", JSON.stringify(users));
-                renderUsers();
-            }
-        }
-
-        function kickUser(id) {
-            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            users = users.filter(u => u.id !== id);
-            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            localStorage.setItem("MT_LIST", JSON.stringify(users.filter(u => u.id !== id)));
             renderUsers();
         }
 
-        function changeTheme() {
-            let color = prompt("اختاري لون السيطرة (مثلاً: blue أو green أو #ff00ff):");
-            if(color) document.documentElement.style.setProperty('--main-color', color);
+        function showUI(id) {
+            document.querySelectorAll('body > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
+
+        function toggleForm(show) {
+            document.getElementById('loginForm').classList.toggle('hidden', show);
+            document.getElementById('registerForm').classList.toggle('hidden', !show);
+        }
+
+        function logout() { sessionStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
