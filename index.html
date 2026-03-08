@@ -2,190 +2,176 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA OMNI-CONTROL v9</title>
+    <title>METIORA ULTIMATE v10</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; transition: 0.5s; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         .hidden { display: none; }
         .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 8px; box-shadow: 0 0 10px var(--main-color); }
-        input { padding: 12px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 260px; }
-        button { padding: 10px 20px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; }
+        input { padding: 10px; margin: 5px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 220px; }
+        button { padding: 8px 15px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; border-radius: 4px; }
         
-        /* أيقونة إدارة الحساب (تظهر للجميع) */
-        .user-settings-icon { position: fixed; top: 50px; left: 10px; font-size: 24px; cursor: pointer; z-index: 999; }
-        .settings-menu { position: fixed; top: 85px; left: 10px; background: #111; border: 1px solid red; padding: 10px; border-radius: 5px; text-align: right; }
+        /* أيقونة الإعدادات العامة */
+        .settings-icon { position: fixed; top: 10px; left: 10px; font-size: 24px; cursor: pointer; z-index: 999; }
+        .menu { position: fixed; top: 45px; left: 10px; background: #111; border: 1px solid red; padding: 10px; border-radius: 5px; text-align: right; }
         
-        /* زر البرمجة العلوي لمتيورة */
-        .dev-tool { position: fixed; top: 10px; right: 10px; font-size: 24px; cursor: pointer; z-index: 1000; filter: drop-shadow(0 0 5px red); }
+        /* أيقونة متيورة السرية (تظهر فقط بعد دخول الإعدادات) */
+        .owner-secret-tool { color: gold; cursor: pointer; padding: 5px; font-size: 14px; border-top: 1px solid #333; margin-top: 5px; }
         
-        .user-card { border-bottom: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center; direction: ltr; }
-        #gameCanvas { background: #111; border: 2px solid var(--main-color); margin-top: 10px; cursor: crosshair; }
+        .user-row { border-bottom: 1px solid #333; padding: 8px; font-size: 13px; text-align: left; direction: ltr; }
     </style>
 </head>
 <body>
 
-    <div id="devIcon" class="dev-tool hidden" onclick="openDevMode()">✏️🔨</div>
-
-    <div id="userIcon" class="user-settings-icon hidden" onclick="document.getElementById('setMenu').classList.toggle('hidden')">⚙️</div>
-    <div id="setMenu" class="settings-menu hidden">
-        <div onclick="alert('جاري الانتقال لإدارة حسابك...')">👤 إدارة حسابي</div>
-        <hr>
-        <div onclick="logout()">🚪 تسجيل الخروج</div>
-    </div>
-
     <marquee id="ownerMessage">نظام السيطرة خاضع لإرادة المطورة متيورة</marquee>
 
-    <div id="authBox" style="text-align:center">
-        <h1 style="margin-top: 5%;">METIORA LOCKDOWN</h1>
-        <div id="loginForm">
+    <div id="authBox">
+        <h1 style="margin-top: 10%;">METIORA LOCKDOWN</h1>
+        <div id="authForm">
             <input type="text" id="userInput" placeholder="اسم المستخدم">
             <br>
             <input type="password" id="passInput" placeholder="كلمة المرور">
             <br>
-            <button onclick="handleLogin()">دخول</button>
-            <br>
-            <div style="margin-top:10px; color:#aaa; cursor:pointer;" onclick="bypass()">التسجيل بحساب آخر (Google/Apple)</div>
+            <button onclick="handleLogin()">تسجيل دخول</button>
+            <button onclick="handleRegister()" style="background:#222; color:white;">إنشاء حساب جديد</button>
         </div>
     </div>
 
-    <div id="adminDashboard" class="hidden">
-        <h1 style="text-align:center">⚔️ لوحة تحكم المالكة متيورة ⚔️</h1>
+    <div id="uiIcons" class="hidden">
+        <div class="settings-icon" onclick="document.getElementById('mainMenu').classList.toggle('hidden')">⚙️</div>
+        <div id="mainMenu" class="menu hidden">
+            <div onclick="showSection('changePassArea')">🔑 تغيير كلمة المرور</div>
+            <div onclick="showSection('tfaArea')">🛡️ التحقق بخطوتين</div>
+            <div onclick="logout()">🚪 تسجيل الخروج</div>
+            <div id="ownerTool" class="owner-secret-tool hidden" onclick="showAdminPanel()">✏️🔨 إعدادات متيورة</div>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+        <h2>⚔️ غرفة عمليات متيورة ⚔️</h2>
         <div class="panel">
-            <h3>👥 إدارة المصير (الضحايا)</h3>
+            <h3>👥 التحكم في الضحايا</h3>
             <div id="usersList"></div>
         </div>
-        <div class="panel" style="text-align:center">
-            <h3>🛡️ صلاحيات الأونر المتقدمة</h3>
-            <button onclick="changeTheme()">🎨 تغيير الثيم</button>
-            <button onclick="alert('تم تفعيل وضع التجسس المباشر')">👁️ وضع التجسس</button>
-        </div>
-        <div style="text-align:center"><button onclick="logout()">خروج</button></div>
+        <button onclick="hideAdmin()">إغلاق اللوحة</button>
     </div>
 
-    <div id="userPanel" class="hidden" style="text-align:center">
-        <h2>مرحباً بك في عالم متيورة</h2>
-        <div class="panel">
-            <h3>🎮 لعبة "تجنب كعكة متيورة"</h3>
-            <p>حاول البقاء حياً أطول فترة ممكنة</p>
-            <canvas id="gameCanvas" width="300" height="150"></canvas>
-            <p id="score">النقاط: 0</p>
+    <div id="userContent" class="hidden">
+        <div id="changePassArea" class="panel hidden">
+            <h3>تغيير كلمة المرور</h3>
+            <input type="password" id="newP" placeholder="كلمة المرور الجديدة">
+            <button onclick="updateMyPass()">حفظ</button>
         </div>
-        <a href="System_Update.zip" download><button style="background:green; color:white">تحديث النظام (تحميل الملف)</button></a>
+
+        <div id="tfaArea" class="panel hidden">
+            <h3>درع الحماية (2FA)</h3>
+            <p id="tfaStatus">الحالة: معطلة</p>
+            <button onclick="toggleMyTFA()">تفعيل / إغلاق</button>
+        </div>
+
+        <div id="welcomeArea" class="panel">
+            <h2>مرحباً بك في النظام</h2>
+            <p>تم تفعيل صلاحيات الوصول الخاصة بك.</p>
+            <a href="System_Update.zip" download><button style="background:green; color:white">تحميل ملف الصلاحيات</button></a>
+        </div>
     </div>
 
     <script>
-        const OWNER = { user: "متيورة", pass: "5262101402" };
+        const OWNER_INFO = { user: "متيورة", pass: "5262101402" };
 
         window.onload = function() {
-            const theme = localStorage.getItem("MT_COLOR") || "#ff0000";
-            document.documentElement.style.setProperty('--main-color', theme);
-            
-            if (sessionStorage.getItem("ACTIVE_SESSION") === "OWNER") {
-                showUI("adminDashboard");
-                document.getElementById('devIcon').classList.remove('hidden');
-                document.getElementById('userIcon').classList.remove('hidden');
-                renderUsers();
-            } else if (sessionStorage.getItem("ACTIVE_SESSION")) {
-                checkLockStatus();
-            }
+            const user = sessionStorage.getItem("USER");
+            if (user) setupUI(user);
         };
+
+        function handleRegister() {
+            const u = document.getElementById('userInput').value.trim();
+            const p = document.getElementById('passInput').value;
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+
+            if (users.some(x => x.user === u) || u === OWNER_INFO.user) return alert("الاسم مستخدم!");
+            users.push({ user: u, pass: p, tfa: false, locked: false, id: Date.now() });
+            localStorage.setItem("MT_DB", JSON.stringify(users));
+            alert("تم إنشاء الحساب!");
+        }
 
         function handleLogin() {
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
-            if (u === OWNER.user && p === OWNER.pass) {
-                sessionStorage.setItem("ACTIVE_SESSION", "OWNER");
+            if (u === OWNER_INFO.user && p === OWNER_INFO.pass) {
+                sessionStorage.setItem("USER", "OWNER");
                 location.reload();
             } else {
-                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-                let found = users.find(x => x.user === u && x.pass === p);
-                if (found) {
-                    if (found.locked) {
-                        alert("إن متيورة أغلقت هذا الحساب، يجب أن تطلب إذن منها لفتحه");
-                        return;
-                    }
-                    sessionStorage.setItem("ACTIVE_SESSION", u);
+                let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+                let f = users.find(x => x.user === u && x.pass === p);
+                if (f) {
+                    if (f.locked) return alert("متيورة أغلقت هذا الحساب!");
+                    sessionStorage.setItem("USER", u);
                     location.reload();
-                } else { alert("خطأ!"); }
+                } else alert("خطأ!");
             }
         }
 
-        function bypass() {
-            let email = prompt("أدخل البريد الإلكتروني:");
-            let pass = prompt("أدخل كلمة المرور:");
-            if (email && pass) {
-                let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-                users.push({ user: email, pass: pass, locked: false, id: Date.now() });
-                localStorage.setItem("MT_LIST", JSON.stringify(users));
-                alert("تم المزامنة بنجاح.");
-            }
+        function setupUI(user) {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('uiIcons').classList.remove('hidden');
+            document.getElementById('userContent').classList.remove('hidden');
+            if (user === "OWNER") document.getElementById('ownerTool').classList.remove('hidden');
+        }
+
+        function showAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('hidden');
+            renderUsers();
         }
 
         function renderUsers() {
-            const list = document.getElementById('usersList');
-            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            list.innerHTML = users.map(u => `
-                <div class="user-card">
-                    <span>${u.user} | ${u.locked ? '🔒 مقفل' : '🔓 نشط'}</span>
-                    <div>
-                        <button onclick="toggleLock(${u.id})">${u.locked ? 'فتح' : 'قفل'}</button>
-                        <button onclick="deleteU(${u.id})" style="background:maroon; color:white">حذف</button>
-                    </div>
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            document.getElementById('usersList').innerHTML = users.map(u => `
+                <div class="user-row">
+                    ${u.user} | PW: ${u.pass} | TFA: ${u.tfa ? '✅' : '❌'}
+                    <br>
+                    <button onclick="admLock(${u.id})">${u.locked ? 'فتح' : 'قفل'}</button>
+                    <button onclick="admTfa(${u.id})">قلب TFA</button>
+                    <button onclick="admDel(${u.id})" style="background:maroon;color:white">حذف</button>
                 </div>
             `).join('');
         }
 
-        function toggleLock(id) {
-            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            users = users.map(u => u.id === id ? {...u, locked: !u.locked} : u);
-            localStorage.setItem("MT_LIST", JSON.stringify(users));
+        // صلاحيات الأونر متيورة
+        function admLock(id) { editUser(id, u => u.locked = !u.locked); }
+        function admTfa(id) { editUser(id, u => u.tfa = !u.tfa); }
+        function admDel(id) {
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            localStorage.setItem("MT_DB", JSON.stringify(users.filter(x => x.id !== id)));
             renderUsers();
         }
 
-        function deleteU(id) {
-            let users = JSON.parse(localStorage.getItem("MT_LIST") || "[]");
-            localStorage.setItem("MT_LIST", JSON.stringify(users.filter(u => u.id !== id)));
+        function editUser(id, callback) {
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            let u = users.find(x => x.id === id);
+            if (u) callback(u);
+            localStorage.setItem("MT_DB", JSON.stringify(users));
             renderUsers();
         }
 
-        function openDevMode() {
-            let code = prompt("أدخلي كود JavaScript للتعديل المباشر:");
-            if (code) { try { eval(code); } catch(e) { alert("خطأ!"); } }
+        function updateMyPass() {
+            let uName = sessionStorage.getItem("USER");
+            if (uName === "OWNER") return alert("لا يمكن تغيير كلمة مرور الأونر من هنا!");
+            let newP = document.getElementById('newP').value;
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            users = users.map(u => u.user === uName ? {...u, pass: newP} : u);
+            localStorage.setItem("MT_DB", JSON.stringify(users));
+            alert("تم التحديث.");
         }
 
-        function showUI(id) {
-            document.querySelectorAll('body > div:not(.dev-tool):not(.user-settings-icon):not(.settings-menu)').forEach(d => d.classList.add('hidden'));
+        function showSection(id) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if (id === "userPanel") initGame();
         }
 
+        function hideAdmin() { document.getElementById('adminPanel').classList.add('hidden'); }
         function logout() { sessionStorage.clear(); location.reload(); }
-
-        // اللعبة المصغرة
-        function initGame() {
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            let score = 0;
-            let x = 150, y = 75;
-            function draw() {
-                ctx.clearRect(0, 0, 300, 150);
-                ctx.fillStyle = "red";
-                ctx.fillRect(x, y, 10, 10); // اللاعب
-                score++;
-                document.getElementById('score').innerText = "النقاط: " + score;
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-
-        function changeTheme() {
-            let c = prompt("اختاري لون السيطرة:");
-            if(c) {
-                document.documentElement.style.setProperty('--main-color', c);
-                localStorage.setItem("MT_COLOR", c);
-            }
-        }
     </script>
 </body>
 </html>
