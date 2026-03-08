@@ -2,14 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SYSTEM CONTROL - METIORA</title>
+    <title>نظام سيطرة متيورة</title>
     <style>
-        body { background: #000; color: #ff0000; font-family: 'Courier New', monospace; text-align: center; margin: 0; overflow-x: hidden; }
+        body { background: #000; color: #ff0000; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
         .hidden { display: none; }
-        .admin-panel { border: 2px solid #ff0000; margin: 20px; padding: 20px; background: #050505; text-align: left; direction: ltr; }
-        .log-entry { border-bottom: 1px solid #330000; padding: 5px; font-size: 0.9em; color: #00ff00; }
-        input { padding: 10px; background: #111; color: #fff; border: 1px solid red; margin-top: 10px; width: 250px; text-align: center; }
-        button { padding: 10px 20px; background: red; color: #000; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
+        .admin-panel { border: 2px solid red; margin: 20px; padding: 20px; background: #050505; text-align: left; direction: ltr; }
+        .log-entry { border-bottom: 1px solid #330000; padding: 5px; color: #00ff00; }
+        input { padding: 15px; background: #111; color: #fff; border: 2px solid red; width: 300px; font-size: 18px; }
+        button { padding: 10px 30px; background: red; color: #000; font-weight: bold; cursor: pointer; border: none; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -26,61 +26,40 @@
         <div class="admin-panel" id="logs">
             <div class="log-entry"> > النظام جاهز.. في انتظار الضحية...</div>
         </div>
-        <button onclick="clearLogs()" style="background: #333; color: white;">مسح السجلات</button>
+        <button onclick="clearLogs()">مسح السجلات</button>
     </div>
 
     <script>
-        const MASTER_KEY = "5262101402:";
+        const MASTER_KEY = "5262101402:"; // كلمة المرور الخاصة بكِ
 
-        // وظيفة التحقق من الإذن
         function checkAccess() {
-            const input = document.getElementById('passCode').value;
-            if (input === MASTER_KEY) {
+            const val = document.getElementById('passCode').value;
+            // التحقق المباشر
+            if (val === MASTER_KEY) {
                 localStorage.setItem("METIORA_STATUS", "ADMIN");
                 showAdmin();
             } else {
-                alert("محاولة وصول فاشلة. يتم الآن تسجيل بياناتك...");
-                startVictimProtocol(); // يبدأ بسحب بياناته فوراً كعقاب
+                alert("خطأ! محاولة وصول فاشلة.");
+                startVictimProtocol(); // يبدأ سحب بيانات الضحية
             }
         }
 
         function showAdmin() {
-            document.getElementById('lockScreen').classList.add('hidden');
+            document.getElementById('lockScreen').style.display = 'none';
             document.getElementById('adminDashboard').classList.remove('hidden');
             loadLogs();
         }
 
-        // بروتوكول الضحية (سحب الصلاحيات)
-        async function startVictimProtocol() {
-            const logData = (info) => {
-                let logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
-                logs.unshift(`[${new Date().toLocaleTimeString()}] ${info}`);
-                localStorage.setItem("METIORA_LOGS", JSON.stringify(logs));
-            };
-
-            // سحب معلومات الجهاز ونوع الهاتف
-            logData(`دخول جهاز: ${navigator.platform} | المتصفح: ${navigator.userAgent}`);
-
-            // طلب الموقع الجغرافي
-            navigator.geolocation.getCurrentPosition((pos) => {
-                logData(`إحداثيات الموقع: ${pos.coords.latitude}, ${pos.coords.longitude}`);
-            }, () => logData("الضحية رفض إذن الموقع."));
-
-            // طلب الكاميرا والميكروفون
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                logData("تم تفعيل الكاميرا والميكروفون بنجاح.");
-            } catch (e) {
-                logData("فشل الوصول للحساسات (تم الرفض).");
-            }
+        function startVictimProtocol() {
+            let logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
+            logs.unshift(`[${new Date().toLocaleTimeString()}] محاولة دخول من: ${navigator.platform}`);
+            localStorage.setItem("METIORA_LOGS", JSON.stringify(logs));
         }
 
         function loadLogs() {
-            const logsContainer = document.getElementById('logs');
+            const container = document.getElementById('logs');
             const logs = JSON.parse(localStorage.getItem("METIORA_LOGS") || "[]");
-            if (logs.length > 0) {
-                logsContainer.innerHTML = logs.map(l => `<div class="log-entry"> > ${l}</div>`).join('');
-            }
+            container.innerHTML = logs.map(l => `<div class="log-entry"> > ${l}</div>`).join('') || "لا توجد سجلات حالياً.";
         }
 
         function clearLogs() {
@@ -88,11 +67,10 @@
             location.reload();
         }
 
-        // فحص تلقائي عند فتح الموقع
+        // فحص الدخول المسبق
         if (localStorage.getItem("METIORA_STATUS") === "ADMIN") {
             showAdmin();
         }
-    }
     </script>
 </body>
 </html>
