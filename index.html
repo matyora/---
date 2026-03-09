@@ -2,25 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>METIORA ULTIMATE SYSTEM</title>
+    <title>METIORA ULTIMATE SYSTEM v11</title>
     <style>
         :root { --main-color: #ff0000; --bg-color: #000; }
-        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; overflow-x: hidden; }
         .hidden { display: none; }
-        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 20px; background: #050505; border-radius: 10px; box-shadow: 0 0 15px var(--main-color); }
-        input { padding: 12px; margin: 8px; background: #111; color: #00ff00; border: 1px solid var(--main-color); width: 260px; border-radius: 5px; }
-        button { padding: 10px 25px; background: var(--main-color); color: #000; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; border-radius: 5px; }
+        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 10px; box-shadow: 0 0 10px red; }
         
-        /* أيقونة الإعدادات العلوية */
+        /* تصميم أيقونة الإعدادات */
         .top-left-settings { position: fixed; top: 15px; left: 15px; font-size: 28px; cursor: pointer; z-index: 1000; }
-        .dropdown-menu { position: fixed; top: 55px; left: 15px; background: #111; border: 1px solid red; padding: 15px; border-radius: 8px; text-align: right; min-width: 180px; z-index: 1001; box-shadow: 0 0 10px red; }
-        .dropdown-menu div { padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
-        .dropdown-menu div:hover { background: #222; }
+        .dropdown-menu { position: fixed; top: 55px; left: 15px; background: #111; border: 1px solid red; padding: 15px; border-radius: 8px; text-align: right; min-width: 180px; z-index: 1001; }
         
-        /* تصميم اللعبة */
-        #gameBoard { width: 250px; height: 250px; border: 2px solid white; margin: 20px auto; display: grid; grid-template-columns: repeat(5, 1fr); background: #111; }
-        .cell { border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 14px; color: white; }
-        .user-row { border-bottom: 1px solid #444; padding: 10px; text-align: left; direction: ltr; font-size: 13px; }
+        /* تصميم بورد اللعبة المتطور */
+        #gameContainer { position: relative; width: 350px; margin: 20px auto; }
+        #gameBoard { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); width: 350px; height: 350px; border: 3px solid #fff; background: #111; }
+        .cell { border: 1px solid #333; position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #444; }
+        .ladder { color: #00ff00; font-weight: bold; }
+        .ghoul { color: #ff00ff; font-weight: bold; }
+        
+        /* القطع المتحركة */
+        .piece { position: absolute; width: 30px; height: 30px; border-radius: 50%; transition: all 0.5s ease-in-out; z-index: 10; border: 2px solid #fff; }
+        #playerPiece { background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+        #robotPiece { background: #0000ff; box-shadow: 0 0 10px #0000ff; }
+        
+        input { padding: 10px; margin: 5px; background: #111; color: #0f0; border: 1px solid red; width: 220px; }
+        button { padding: 10px 20px; background: red; color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; border-radius: 5px; }
+        .user-row { border-bottom: 1px solid #444; padding: 10px; text-align: left; direction: ltr; }
     </style>
 </head>
 <body>
@@ -28,48 +35,41 @@
     <div id="settingsIcon" class="top-left-settings hidden" onclick="toggleMenu()">⚙️</div>
     <div id="settingsMenu" class="dropdown-menu hidden">
         <div onclick="showPage('manageMyAccount')">👤 إدارة حسابي</div>
-        <div id="adminLink" class="hidden" onclick="showPage('adminUsersPanel')" style="color: gold; font-weight: bold;">🛡️ إدارة المستخدمين</div>
-        <div onclick="logout()" style="color: #888;">🚪 تسجيل الخروج</div>
+        <div id="adminLink" class="hidden" onclick="showPage('adminUsersPanel')" style="color: gold;">🛡️ إدارة المستخدمين</div>
+        <div onclick="logout()">🚪 تسجيل الخروج</div>
     </div>
 
     <div id="authPage">
-        <h1 style="margin-top: 8%;">METIORA SYSTEM</h1>
+        <h1 style="margin-top: 10%;">METIORA LOCKDOWN</h1>
         <div id="loginBox" class="panel">
             <input type="text" id="userIn" placeholder="اسم المستخدم">
             <br>
             <input type="password" id="passIn" placeholder="كلمة المرور">
             <br>
             <button onclick="login()">دخول</button>
-            <p style="cursor:pointer; text-decoration: underline; font-size: 14px; margin-top: 15px;" onclick="toggleAuth(true)">إنشاء حساب جديد</p>
+            <p style="cursor:pointer;" onclick="toggleAuth(true)">إنشاء حساب جديد</p>
         </div>
         <div id="registerBox" class="panel hidden">
             <input type="text" id="regUser" placeholder="اسم مستخدم جديد">
             <br>
             <input type="password" id="regPass" placeholder="كلمة مرور جديدة">
             <br>
-            <button onclick="register()">تأكيد الإنشاء</button>
-            <p style="cursor:pointer; font-size: 14px;" onclick="toggleAuth(false)">العودة للدخول</p>
+            <button onclick="register()">تأكيد</button>
+            <p style="cursor:pointer;" onclick="toggleAuth(false)">رجوع</p>
         </div>
     </div>
 
     <div id="gamePage" class="hidden">
-        <h2>لعبة السلم والغول 🪜👹</h2>
-        <div id="gameBoard"></div>
-        <p id="gameStatus">دورك الآن...</p>
-        <button onclick="alert('رميت النرد! تحركت 3 خطوات.')">رمي النرد</button>
-    </div>
-
-    <div id="manageMyAccount" class="hidden">
-        <h2>إدارة حسابي</h2>
-        <div class="panel">
-            <p>تغيير كلمة المرور</p>
-            <input type="password" id="changeP" placeholder="الباسوورد الجديد">
-            <button onclick="updatePass()">حفظ</button>
-            <hr>
-            <p>التحقق بخطوتين: <span id="tfaStatus">معطلة</span></p>
-            <button onclick="toggleTFA()">تفعيل / إغلاق</button>
+        <h2>سلم 🪜 ضد غول 👹</h2>
+        <div id="gameContainer">
+            <div id="gameBoard"></div>
+            <div id="playerPiece" class="piece"></div>
+            <div id="robotPiece" class="piece"></div>
         </div>
-        <button onclick="showPage('gamePage')">العودة</button>
+        <div class="panel">
+            <p id="gameStatus">دورك الآن..</p>
+            <button id="rollBtn" onclick="playTurn()">🎲 رمي النرد</button>
+        </div>
     </div>
 
     <div id="adminUsersPanel" class="hidden">
@@ -78,34 +78,38 @@
         <button onclick="showPage('gamePage')">إغلاق</button>
     </div>
 
+    <div id="manageMyAccount" class="hidden">
+        <h2>إدارة حسابي</h2>
+        <div class="panel">
+            <input type="password" id="changeP" placeholder="باسوورد جديد">
+            <button onclick="updatePass()">تحديث</button>
+        </div>
+        <button onclick="showPage('gamePage')">رجوع</button>
+    </div>
+
     <script>
-        // بيانات الأونر متيورة الثابتة
-        const OWNER = { 
-            user: "متيورة", 
-            pass: "5262101402", 
-            v1: "142376088", 
-            v2: "متيورة المتحكمة و المسيطرة" 
-        };
+        const OWNER = { user: "متيورة", pass: "5262101402", v1: "142376088", v2: "متيورة المتحكمة و المسيطرة" };
+        let playerPos = 0, robotPos = 0;
+        const boardSize = 25;
+        const ladders = { 3: 12, 10: 20, 16: 23 };
+        const ghouls = { 7: 2, 14: 5, 22: 11 };
 
         function login() {
             const u = document.getElementById('userIn').value;
             const p = document.getElementById('passIn').value;
-
             if (u === OWNER.user && p === OWNER.pass) {
-                // نظام التحقق بخطوتين الخاص بمتيورة
-                if(prompt("التحقق 1 (الرمز الرقمي):") === OWNER.v1 && 
-                   prompt("التحقق 2 (الرمز النصي):") === OWNER.v2) {
+                if(prompt("رمز التحقق 1:") === OWNER.v1 && prompt("رمز التحقق 2:") === OWNER.v2) {
                     sessionStorage.setItem("SESSION", "OWNER");
                     location.reload();
-                } else { alert("فشل التحقق الأمني!"); }
+                }
             } else {
                 let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
                 let f = users.find(x => x.user === u && x.pass === p);
                 if (f) {
-                    if (f.locked) return alert("إن متيورة أغلقت هذا الحساب، يجب أن تطلب إذن منها لفتحه");
+                    if (f.locked) return alert("إن متيورة أغلقت هذا الحساب!");
                     sessionStorage.setItem("SESSION", u);
                     location.reload();
-                } else alert("خطأ في البيانات!");
+                } else alert("خطأ!");
             }
         }
 
@@ -116,79 +120,169 @@
                 document.getElementById('settingsIcon').classList.remove('hidden');
                 document.getElementById('gamePage').classList.remove('hidden');
                 if (session === "OWNER") document.getElementById('adminLink').classList.remove('hidden');
-                initBoard();
+                createBoard();
+                updatePieces();
             }
         };
 
-        // صلاحيات الأونر (متيورة)
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            for (let i = boardSize; i >= 1; i--) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = 'cell-' + i;
+                cell.innerText = i;
+                if (ladders[i]) cell.innerHTML += "<br><span class='ladder'>🪜</span>";
+                if (ghouls[i]) cell.innerHTML += "<br><span class='ghoul'>👹</span>";
+                board.appendChild(cell);
+            }
+        }
+
+        function playTurn() {
+            document.getElementById('rollBtn').disabled = true;
+            let roll = Math.floor(Math.random() * 6) + 1;
+            playerPos = movePiece(playerPos, roll, "أنت");
+            
+            setTimeout(() => {
+                let rRoll = Math.floor(Math.random() * 6) + 1;
+                robotPos = movePiece(robotPos, rRoll, "الروبوت");
+                document.getElementById('rollBtn').disabled = false;
+            }, 1200);
+        }
+
+        function movePiece(currentPos, roll, name) {
+            let next = currentPos + roll;
+            if (next > boardSize) next = boardSize;
+            
+            // فحص السلالم والغيلان
+            if (ladders[next]) {
+                alert(name + " صعد سلماً إلى " + ladders[next]);
+                next = ladders[next];
+            } else if (ghouls[next]) {
+                alert(name + " واجه غولاً وعاد إلى " + ghouls[next]);
+                next = ghouls[next];
+            }
+            
+            document.getElementById('gameStatus').innerText = name + " رمى " + roll + " وهو الآن في " + next;
+            updatePieces();
+            if (next === boardSize) { alert(name + " فاز!"); location.reload(); }
+            return next;
+        }
+
+        function updatePieces() {
+            setPos('playerPiece', playerPos);
+            setPos('robotPiece', robotPos);
+        }
+
+        function setPos(id, pos) {
+            if (pos === 0) {
+                document.getElementById(id).style.bottom = "-40px";
+                return;
+            }
+            const cell = document.getElementById('cell-' + pos);
+            const rect = cell.getBoundingClientRect();
+            const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
+            const piece = document.getElementById(id);
+            piece.style.left = (rect.left - boardRect.left + 5) + "px";
+            piece.style.top = (rect.top - boardRect.top + 5) + "px";
+        }
+
+        // صلاحيات متيورة (إدارة الضحايا)
         function renderAdmin() {
             let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
             document.getElementById('usersContainer').innerHTML = users.map(u => `
                 <div class="user-row">
-                    <b>${u.user}</b> | PW: ${u.pass} | 2FA: ${u.tfa ? 'ON' : 'OFF'}
+                    <b>${u.user}</b> | PW: ${u.pass}
                     <br>
                     <button onclick="admLock('${u.user}')">${u.locked ? '🔓 فتح' : '🔒 قفل'}</button>
-                    <button onclick="admPass('${u.user}')">تغيير PW</button>
-                    <button onclick="admDel('${u.user}')" style="background:maroon;color:white">حذف</button>
+                    <button onclick="admDel('${u.user}')" style="background:maroon; color:white">حذف</button>
                     <button onclick="admLogin('${u.user}')">دخول كـ</button>
                 </div>
-            `).join('') || "لا يوجد مستخدمين خاضعين للسيطرة حالياً.";
+            `).join('');
         }
 
-        function admLock(n) { editUser(n, u => u.locked = !u.locked); }
-        function admPass(n) { let p = prompt("الباسوورد الجديد:"); if(p) editUser(n, u => u.pass = p); }
+        function admLock(n) { 
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            users = users.map(u => u.user === n ? {...u, locked: !u.locked} : u);
+            localStorage.setItem("MT_DB", JSON.stringify(users));
+            renderAdmin();
+        }
+
         function admDel(n) {
             let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
             localStorage.setItem("MT_DB", JSON.stringify(users.filter(x => x.user !== n)));
             renderAdmin();
         }
+
         function admLogin(n) { sessionStorage.setItem("SESSION", n); location.reload(); }
 
-        function editUser(n, callback) {
-            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
-            let u = users.find(x => x.user === n);
-            if (u) callback(u);
-            localStorage.setItem("MT_DB", JSON.stringify(users));
-            renderAdmin();
+        function toggleAuth(isReg) {
+            document.getElementById('loginBox').classList.toggle('hidden', isReg);
+            document.getElementById('registerBox').classList.toggle('hidden', !isReg);
         }
-
-        // وظائف المستخدمين
-        function register() {
-            const u = document.getElementById('regUser').value.trim();
-            const p = document.getElementById('regPass').value;
-            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
-            if (users.some(x => x.user === u) || u === OWNER.user) return alert("الاسم محجوز!");
-            users.push({ user: u, pass: p, tfa: false, locked: false });
-            localStorage.setItem("MT_DB", JSON.stringify(users));
-            alert("تم إنشاء حسابك بنجاح!"); toggleAuth(false);
-        }
-
         function showPage(id) {
             document.querySelectorAll('body > div:not(.top-left-settings):not(.dropdown-menu)').forEach(d => d.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.getElementById('settingsMenu').classList.add('hidden');
             if(id === 'adminUsersPanel') renderAdmin();
         }
-
-        function initBoard() {
-            const board = document.getElementById('gameBoard');
-            board.innerHTML = '';
-            for(let i=25; i>=1; i--) {
-                let cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.innerText = i;
-                if(i===7) cell.innerText = "🪜";
-                if(i===13) cell.innerText = "👹";
-                board.appendChild(cell);
-            }
-        }
-
-        function toggleAuth(isReg) {
-            document.getElementById('loginBox').classList.toggle('hidden', isReg);
-            document.getElementById('registerBox').classList.toggle('hidden', !isReg);
-        }
         function toggleMenu() { document.getElementById('settingsMenu').classList.toggle('hidden'); }
         function logout() { sessionStorage.clear(); location.reload(); }
+        
+        function register() {
+            const u = document.getElementById('regUser').value.trim();
+            const p = document.getElementById('regPass').value;
+            let users = JSON.parse(localStorage.getItem("MT_DB") || "[]");
+            if (users.some(x => x.user === u) || u === OWNER.user) return alert("محجوز!");
+            users.push({ user: u, pass: p, locked: false });
+            localStorage.setItem("MT_DB", JSON.stringify(users));
+            alert("تم!"); toggleAuth(false);
+        }
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>METIORA OMNI-CONTROL v12</title>
+    <style>
+        :root { --main-color: #ff0000; --bg-color: #000; }
+        body { background: var(--bg-color); color: var(--main-color); font-family: 'Courier New', monospace; margin: 0; text-align: center; }
+        .hidden { display: none; }
+        .panel { border: 2px solid var(--main-color); margin: 15px; padding: 15px; background: #050505; border-radius: 10px; box-shadow: 0 0 10px red; }
+        .top-left-settings { position: fixed; top: 15px; left: 15px; font-size: 28px; cursor: pointer; z-index: 1000; }
+        .dropdown-menu { position: fixed; top: 55px; left: 15px; background: #111; border: 1px solid red; padding: 15px; border-radius: 8px; text-align: right; min-width: 180px; z-index: 1001; }
+        
+        #gameContainer { position: relative; width: 350px; margin: 10px auto; }
+        #gameBoard { display: grid; grid-template-columns: repeat(5, 1fr); width: 350px; height: 350px; border: 3px solid #fff; background: #111; }
+        .cell { border: 1px solid #333; position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .piece { position: absolute; width: 25px; height: 25px; border-radius: 50%; transition: all 0.5s; z-index: 10; border: 2px solid #fff; }
+        
+        input { padding: 10px; margin: 5px; background: #111; color: #0f0; border: 1px solid red; width: 240px; }
+        button { padding: 10px 20px; background: red; color: #000; font-weight: bold; border: none; cursor: pointer; margin: 5px; border-radius: 5px; }
+        .user-row { border-bottom: 1px solid #444; padding: 10px; text-align: left; direction: ltr; }
+    </style>
+</head>
+<body>
+
+    <div id="settingsIcon" class="top-left-settings hidden" onclick="toggleMenu()">⚙️</div>
+    <div id="settingsMenu" class="dropdown-menu hidden">
+        <div onclick="showPage('manageMyAccount')">👤 إدارة حسابي</div>
+        <div id="adminLink" class="hidden" onclick="showPage('adminUsersPanel')" style="color: gold;">🛡️ إدارة المستخدمين</div>
+        <div onclick="logout()">🚪 تسجيل الخروج</div>
+    </div>
+
+    <div id="authPage">
+        <h1 style="margin-top: 5%;">METIORA LOCKDOWN</h1>
+        <div id="loginBox" class="panel">
+            <input type="text" id="userIn" placeholder="اسم المستخدم">
+            <br>
+            <input type="password" id="passIn" placeholder="كلمة المرور">
+            <br>
+            <button onclick="handleLogin()">تسجيل دخول</button>
+            <p onclick="toggleAuth(true)" style="cursor:pointer; text-decoration: underline;">إنشاء حساب جديد</p>
+        </div>
+
+        <div id
